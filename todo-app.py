@@ -22,7 +22,8 @@ class ToDoList(QMainWindow):
         self.save_button = QPushButton('Save To File')
         self.load_button = QPushButton('Load From File')
         self.edit_button = QPushButton('Edit Task')
-        self.prioritize_button = QPushButton('Prioritize Task')  # New button for prioritizing tasks
+        self.prioritize_button = QPushButton('Prioritize Task')
+        self.sort_button = QPushButton('Sort Tasks')  # New button for sorting tasks
 
         # Connect buttons to their functions
         self.add_button.clicked.connect(self.add_task)
@@ -31,7 +32,8 @@ class ToDoList(QMainWindow):
         self.save_button.clicked.connect(self.save_to_file)
         self.load_button.clicked.connect(self.load_from_file)
         self.edit_button.clicked.connect(self.edit_task)
-        self.prioritize_button.clicked.connect(self.prioritize_task)  # Connect the new button to its function
+        self.prioritize_button.clicked.connect(self.prioritize_task)
+        self.sort_button.clicked.connect(self.sort_tasks)  # Connect the new button to its function
 
         main_layout = QHBoxLayout()
         left_layout = QVBoxLayout()
@@ -42,7 +44,8 @@ class ToDoList(QMainWindow):
         left_layout.addWidget(self.save_button)
         left_layout.addWidget(self.load_button)
         left_layout.addWidget(self.edit_button)
-        left_layout.addWidget(self.prioritize_button)  # Add the new button to the layout
+        left_layout.addWidget(self.prioritize_button)
+        left_layout.addWidget(self.sort_button)  # Add the new button to the layout
         
         right_layout = QVBoxLayout()
         self.task_details_widget = QTextEdit()
@@ -108,12 +111,25 @@ class ToDoList(QMainWindow):
             if ok and new_task != '':
                 current_item.setText(new_task)
 
-    def prioritize_task(self):  # New function for prioritizing tasks
+    def prioritize_task(self):
         current_item = self.list_widget.currentItem()
         if current_item:
             current_row = self.list_widget.row(current_item)
             self.list_widget.takeItem(current_row)
             self.list_widget.insertItem(0, current_item)
+
+    def sort_tasks(self):  # New function for sorting tasks
+        tasks = []
+        for row in range(self.list_widget.count()):
+            item = self.list_widget.item(row)
+            tasks.append((item.text(), item.checkState()))
+        tasks.sort()
+        self.list_widget.clear()
+        for task_text, task_state in tasks:
+            item = QListWidgetItem(task_text)
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            item.setCheckState(task_state)
+            self.list_widget.addItem(item)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
