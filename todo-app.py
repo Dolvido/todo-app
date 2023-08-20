@@ -1,3 +1,4 @@
+from PyQt5.QtWidgets import QHBoxLayout, QTextEdit
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPushButton, QListWidget, QListWidgetItem, QFileDialog, QWidget, QInputDialog
 from PyQt5.QtCore import Qt
@@ -7,12 +8,10 @@ class ToDoList(QMainWindow):
 
     def __init__(self):
         super().__init__()
-
         self.init_ui()
 
     def init_ui(self):
         self.setWindowTitle('To-Do List')
-
         layout = QVBoxLayout()
 
         # Widgets
@@ -22,6 +21,7 @@ class ToDoList(QMainWindow):
         self.mark_button = QPushButton('Mark as Completed')
         self.save_button = QPushButton('Save To File')
         self.load_button = QPushButton('Load From File')
+        self.edit_button = QPushButton('Edit Task')  # New button for editing tasks
 
         # Connect buttons to their functions
         self.add_button.clicked.connect(self.add_task)
@@ -29,28 +29,36 @@ class ToDoList(QMainWindow):
         self.mark_button.clicked.connect(self.mark_completed)
         self.save_button.clicked.connect(self.save_to_file)
         self.load_button.clicked.connect(self.load_from_file)
+        self.edit_button.clicked.connect(self.edit_task)  # Connect the new button to its function
 
-        # Add widgets to layout
-        layout.addWidget(self.list_widget)
-        layout.addWidget(self.add_button)
-        layout.addWidget(self.remove_button)
-        layout.addWidget(self.mark_button)
-        layout.addWidget(self.save_button)
-        layout.addWidget(self.load_button)
-
+        main_layout = QHBoxLayout()
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(self.list_widget)
+        left_layout.addWidget(self.add_button)
+        left_layout.addWidget(self.remove_button)
+        left_layout.addWidget(self.mark_button)
+        left_layout.addWidget(self.save_button)
+        left_layout.addWidget(self.load_button)
+        left_layout.addWidget(self.edit_button)  # Add the new button to the layout
+        
+        right_layout = QVBoxLayout()
+        self.task_details_widget = QTextEdit()
+        self.task_details_widget.setPlaceholderText('Select a task to view details...')
+        right_layout.addWidget(self.task_details_widget)
+        
+        main_layout.addLayout(left_layout)
+        main_layout.addLayout(right_layout)
         central_widget = QWidget()
-        central_widget.setLayout(layout)
-
+        central_widget.setLayout(main_layout)
         self.setCentralWidget(central_widget)
 
     def add_task(self):
-        new_task, _ = QInputDialog.getText(self, 'Add Task', 'Task:')
-        if new_task:
+        new_task, ok = QInputDialog.getText(self, 'Add Task', 'Enter task:')
+        if ok and new_task != '':
             item = QListWidgetItem(new_task)
-            item.setFlags(item.flags() | Qt.ItemIsUserCheckable) # Makes the item checkable
-            item.setCheckState(Qt.Unchecked) # Default state is unchecked
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)  # Makes the item checkable
+            item.setCheckState(Qt.Unchecked)  # Default state is unchecked
             self.list_widget.addItem(item)
-
 
     def remove_task(self):
         current_item = self.list_widget.currentItem()
@@ -73,7 +81,7 @@ class ToDoList(QMainWindow):
                     task_text = item.text()
                     task_status = "completed" if item.checkState() == Qt.Checked else "not completed"
                     file.write(f'{task_text};{task_status}\n')
-  
+
     def load_from_file(self):
         options = QFileDialog.Options()
         file_name, _ = QFileDialog.getOpenFileName(self, "Open To-Do List", "", "Text Files (*.txt);;All Files (*)", options=options)
@@ -90,6 +98,12 @@ class ToDoList(QMainWindow):
                         item.setCheckState(Qt.Unchecked)
                     self.list_widget.addItem(item)
 
+    def edit_task(self):  # New function for editing tasks
+        current_item = self.list_widget.currentItem()
+        if current_item:
+            new_task, ok = QInputDialog.getText(self, 'Edit Task', 'Enter new task details:', text=current_item.text())
+            if ok and new_task != '':
+                current_item.setText(new_task)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
