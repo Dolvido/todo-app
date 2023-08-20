@@ -51,6 +51,3 @@ Please make sure to update tests as appropriate.
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
-```
-
-Remember to replace `yourusername` with your actual GitHub username.
