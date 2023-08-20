@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QHBoxLayout, QTextEdit
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPushButton, QListWidget, QListWidgetItem, QFileDialog, QWidget, QInputDialog
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QKeySequence, QStandardItemModel, QStandardItem
+from PyQt5.QtGui import QKeySequence, QStandardItemModel, QStandardItem, QBrush, QColor
 
 class ToDoList(QMainWindow):
 
@@ -23,7 +23,8 @@ class ToDoList(QMainWindow):
         self.load_button = QPushButton('Load From File')
         self.edit_button = QPushButton('Edit Task')
         self.prioritize_button = QPushButton('Prioritize Task')
-        self.sort_button = QPushButton('Sort Tasks')  # New button for sorting tasks
+        self.sort_button = QPushButton('Sort Tasks')
+        self.search_button = QPushButton('Search Task')  # New button for searching tasks
 
         # Connect buttons to their functions
         self.add_button.clicked.connect(self.add_task)
@@ -33,7 +34,8 @@ class ToDoList(QMainWindow):
         self.load_button.clicked.connect(self.load_from_file)
         self.edit_button.clicked.connect(self.edit_task)
         self.prioritize_button.clicked.connect(self.prioritize_task)
-        self.sort_button.clicked.connect(self.sort_tasks)  # Connect the new button to its function
+        self.sort_button.clicked.connect(self.sort_tasks)
+        self.search_button.clicked.connect(self.search_task)  # Connect the new button to its function
 
         main_layout = QHBoxLayout()
         left_layout = QVBoxLayout()
@@ -45,7 +47,8 @@ class ToDoList(QMainWindow):
         left_layout.addWidget(self.load_button)
         left_layout.addWidget(self.edit_button)
         left_layout.addWidget(self.prioritize_button)
-        left_layout.addWidget(self.sort_button)  # Add the new button to the layout
+        left_layout.addWidget(self.sort_button)
+        left_layout.addWidget(self.search_button)  # Add the new button to the layout
         
         right_layout = QVBoxLayout()
         self.task_details_widget = QTextEdit()
@@ -118,7 +121,7 @@ class ToDoList(QMainWindow):
             self.list_widget.takeItem(current_row)
             self.list_widget.insertItem(0, current_item)
 
-    def sort_tasks(self):  # New function for sorting tasks
+    def sort_tasks(self):
         tasks = []
         for row in range(self.list_widget.count()):
             item = self.list_widget.item(row)
@@ -130,6 +133,16 @@ class ToDoList(QMainWindow):
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(task_state)
             self.list_widget.addItem(item)
+
+    def search_task(self):  # New function for searching tasks
+        search_term, ok = QInputDialog.getText(self, 'Search Task', 'Enter search term:')
+        if ok and search_term != '':
+            for row in range(self.list_widget.count()):
+                item = self.list_widget.item(row)
+                if search_term.lower() in item.text().lower():
+                    item.setBackground(QBrush(QColor('yellow')))
+                else:
+                    item.setBackground(QBrush(QColor('white')))
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
